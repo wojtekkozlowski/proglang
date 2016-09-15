@@ -13,7 +13,6 @@ fun number_in_month(ds: (int * int * int) list, m:int):int =
 		if (#2 (hd ds)) = m then number_in_month((tl ds),m) + 1
 		else number_in_month((tl ds),m);
 
-
 (* 3. Write a function number_in_months that takes a list of dates and a list of months (i.e., an int list)
 and returns the number of dates in the list of dates that are in any of the months in the list of months.
 Assume the list of months has no number repeated.
@@ -45,11 +44,9 @@ fun dates_in_months(ds:  (int * int * int) list, ms: int list):  (int * int * in
 (* 6.Write a function get_nth that takes a list of strings and an int n and returns the n th element of the list where the head of the list is 1 st
 . Do not worry about the case where the list has too few elements: your function may apply hd or tl to the empty list in this case, which is okay
 *)
-fun get_nth (ss: string list, n: int): string option = 
-	if null ss then NONE
- 	else
-		if n = 0 then SOME(hd ss)
-		else get_nth((tl ss), n-1);
+fun get_nth (ss: string list, n: int): string =
+	if n = 1 then hd ss
+	else get_nth(tl ss, n-1); 
 
 (* 7.  Write a function date_to_string that takes a date and returns a string of the form January 20, 2013 (for example). Use the operator
 ^ for concatenating strings and the library function Int.toString for converting an int to a string. For producing the month part, do
@@ -69,27 +66,17 @@ fun date_to_string(d: (int * int * int)): string =
 , which you can assume contains all positive numbers, and returns an int. You should return an int n such that the rst
 n elements of the list add to less than sum, but the rst n + 1 elements of the list add to sum or more.
 Assume the entire list sums to more than the passed in value; it is okay for an exception to occur if this is not the case.*)
-fun number_before_reaching_sum(is: int list, max: int): int =
-	let fun number_before_reaching_sum_i(is: int list, max: int, cs: int): int =
-			if (hd is) + cs > max then cs
-			else number_before_reaching_sum_i(tl is, max, (hd is) + cs)
- 	in number_before_reaching_sum_i(is, max, 0)
+fun number_before_reaching_sum(max: int, is: int list): int =
+	let fun number_before_reaching_sum_i(max: int, is: int list, cs: int, n:int): int =
+			if (hd is) + cs >= max then n
+			else number_before_reaching_sum_i(max, tl is, (hd is) + cs, n + 1)
+ 	in number_before_reaching_sum_i(max, is, 0, 0)
  	end;
 
 (* 9. Write a function what_month that takes a day of year (i.e., an int between 1 awhat_month(nd 365) and returns
 what month that day is in (1 for January, 2 for February, etc.). Use a list holding 12 integers and your answer to the previous problem. *)
 
-fun what_month(d: int): int = 
-	let
-		val months = [31,28,31,30,31,30,31,31,30,31,30,31]
-		fun index_of(is: int list, i, cs: int, n:int): int = 
-			if cs + (hd is) = i then n
-			else index_of(tl is, i, cs + (hd is), n + 1)
-		val r = number_before_reaching_sum(months, d-1)
-	in 
-		if r = 0 then 1
-		else index_of(months, r, 0, 2)
-	end;
+fun what_month(d: int): int = number_before_reaching_sum(d, [31,28,31,30,31,30,31,31,30,31,30,31]) + 1
 	
 (* 10. Write a function month_range that takes two days of the year day1 and day2 and returns an int list
 [m1,m2,...,mn] where m1 is the month of day1, m2 is the month of day1+1, ..., and mn is the month
