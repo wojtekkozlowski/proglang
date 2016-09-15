@@ -2,12 +2,12 @@
 the first argument is a date that comes before the second argument. (If the two dates are the same, the result is false. *)
 fun is_older(d1:  (int * int * int), d2:  (int * int * int)):bool = 
 	let fun day_n(d:  (int * int * int)) = (#1 d) * 365 + (#2 d) * 31 + (#3 d)
-	in day_n(d1) > day_n(d2)
+	in day_n(d1) < day_n(d2)
 	end
 
 (* 2. Write a function number_in_month that takes a list of dates and a month (i.e., an int ) and returns
 how many dates in the list are in the given month. *)
-fun number_in_month(ds:  (int * int * int) list, m:int):int = 
+fun number_in_month(ds: (int * int * int) list, m:int):int = 
 	if null ds then	0
 	else
 		if (#2 (hd ds)) = m then number_in_month((tl ds),m) + 1
@@ -45,11 +45,11 @@ fun dates_in_months(ds:  (int * int * int) list, ms: int list):  (int * int * in
 (* 6.Write a function get_nth that takes a list of strings and an int n and returns the n th element of the list where the head of the list is 1 st
 . Do not worry about the case where the list has too few elements: your function may apply hd or tl to the empty list in this case, which is okay
 *)
-fun gen_nth (ss: string list, n: int): string option = 
+fun get_nth (ss: string list, n: int): string option = 
 	if null ss then NONE
  	else
 		if n = 0 then SOME(hd ss)
-		else gen_nth((tl ss), n-1);
+		else get_nth((tl ss), n-1);
 
 (* 7.  Write a function date_to_string that takes a date and returns a string of the form January 20, 2013 (for example). Use the operator
 ^ for concatenating strings and the library function Int.toString for converting an int to a string. For producing the month part, do
@@ -61,7 +61,7 @@ fun date_to_string(d: (int * int * int)): string =
 		val months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 		fun i_t_m(i:int, ms: string list): string = 
 			if i = 0 then hd ms else i_t_m(i-1, tl ms);
-	in i_t_m((#2 d), months) ^ " " ^ Int.toString(#3 d) ^ ", " ^ Int.toString(#1 d)
+	in i_t_m((#2 d)-1, months) ^ " " ^ Int.toString(#3 d) ^ ", " ^ Int.toString(#1 d)
 	end
 	 
 	 
@@ -76,19 +76,27 @@ fun number_before_reaching_sum(is: int list, max: int): int =
  	in number_before_reaching_sum_i(is, max, 0)
  	end;
 
-(* 9. Write a function what_month that takes a day of year (i.e., an int between 1 and 365) and returns
+(* 9. Write a function what_month that takes a day of year (i.e., an int between 1 awhat_month(nd 365) and returns
 what month that day is in (1 for January, 2 for February, etc.). Use a list holding 12 integers and your answer to the previous problem. *)
 
 fun what_month(d: int): int = 
-	let fun list_from_to(a:int, b:int):int list = if a = b then [a] else list_from_to(a,b-1) @ [b]
-	in number_before_reaching_sum(list_from_to(1,12), d div 31) + 1
+	let
+		val months = [31,28,31,30,31,30,31,31,30,31,30,31]
+		fun index_of(is: int list, i, cs: int, n:int): int = 
+			if cs + (hd is) = i then n
+			else index_of(tl is, i, cs + (hd is), n + 1)
+		val r = number_before_reaching_sum(months, d-1)
+	in 
+		if r = 0 then 1
+		else index_of(months, r, 0, 2)
 	end;
 	
 (* 10. Write a function month_range that takes two days of the year day1 and day2 and returns an int list
 [m1,m2,...,mn] where m1 is the month of day1, m2 is the month of day1+1, ..., and mn is the month
 of day day2. Note the result will have length day2 - day1 + 1 or length 0 if day1>day2 .*)
 fun month_range(d1: int, d2: int): int list =
-	if d2 = d1 then [what_month d1]
+	if d2 < d1 then []
+	else if d2 = d1 then [what_month d1]
 	else month_range(d1, d2-1) @ [what_month(d2)];
 	
 (* 11. Write a function oldest that takes a list of dates and evaluates to an (int*int*int) option. It evaluates to
